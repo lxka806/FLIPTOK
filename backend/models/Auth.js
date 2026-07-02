@@ -35,10 +35,9 @@ const userSchema = new mongoose.Schema(
             type: Number,
             default: 0
         },
-        folowes: {
-            type: Number,
-            default: 0
-        },
+        followers: [
+            { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+        ],
         Posts: [
             {
                 type: mongoose.Schema.Types.ObjectId,
@@ -48,8 +47,10 @@ const userSchema = new mongoose.Schema(
         totalPosts: {
             type: Number,
             default: 0
-        }
-
+        },
+        following: [
+            { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+        ]
     },
     {
         timestamps: true

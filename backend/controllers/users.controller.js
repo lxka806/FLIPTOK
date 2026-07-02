@@ -72,8 +72,19 @@ const login = async (req, res) => {
         );
 
         res.status(200).json({
-            message: "Login successful",
-            user,
+        message: "Login successful",
+            user: {
+                id: user._id,
+                username: user.username,
+                image: user.image,
+                name: user.name,
+                email: user.email,
+                bio: user.bio,
+                totalLikes: user.totalLikes,
+                followers: user.followers,
+                following: user.following,
+                totalPosts: user.totalPosts
+            },
             token
         });
 
@@ -82,5 +93,180 @@ const login = async (req, res) => {
     }
 };
 
+const followUser = async (req, res) => {
+    try {
+        const currentUserId = req.user.id;
+        const targetUserId = req.params.id;
 
-module.exports = { signup, login };
+        if (currentUserId === targetUserId) {
+            return res.status(400).json({ message: "You cannot follow yourself" });
+        }
+
+        const user = await User.findById(targetUserId);
+        const currentUser = await User.findById(currentUserId);
+
+        if (!user || !currentUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // already following check
+        if (user.followers.includes(currentUserId)) {
+            return res.status(400).json({ message: "Already following" });
+        }
+
+        user.followers.push(currentUserId);
+        currentUser.following.push(targetUserId);
+
+        await user.save();
+        await currentUser.save();
+
+        res.status(200).json({ message: "Followed successfully" });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const unfollowUser = async (req, res) => {
+    try {
+        const currentUserId = req.user.id;
+        const targetUserId = req.params.id;
+
+        const user = await User.findById(targetUserId);
+        const currentUser = await User.findById(currentUserId);
+
+        if (!user || !currentUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        user.followers = user.followers.filter(
+            id => id.toString() !== currentUserId
+        );
+
+        currentUser.following = currentUser.following.filter(
+            id => id.toString() !== targetUserId
+        );
+
+        await user.save();
+        await currentUser.save();
+
+        res.status(200).json({ message: "Unfollowed successfully" });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const logout = async (req, res) => {
+    try{
+        res.status(200).json({ message: "Logout successful" });
+    }catch(err){
+        res.status(500).json({ err: err.message})
+    }
+}
+
+const getMe = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        if (!userId) {
+            return res.status(400).json({ message: "User ID not found in token" });
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            user: {
+                _id: user._id,
+                username: user.username,
+                image: user.image,
+                name: user.name,
+                email: user.email,
+                bio: user.bio,
+                totalLikes: user.totalLikes,
+                followers: user.followers,
+                following: user.following,
+                totalPosts: user.totalPosts
+            }
+        });
+
+    } catch (err) {
+        console.error("getMe error:", err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().select("-password");
+
+        res.status(200).json({ users });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const searchUsers = async (req, res) => {
+    try {
+        const { query } = req.query;
+
+        if (!query || query.trim() === "") {
+            return res.status(400).json({ message: "Search query is required" });
+        }
+
+        const users = await User.find({
+            $or: [
+                { username: { $regex: query, $options: "i" } },
+                { name: { $regex: query, $options: "i" } },
+                { email: { $regex: query, $options: "i" } }
+            ]
+        }).select("-password").limit(20);
+
+        res.status(200).json({ users });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+const getUserById = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            user: {
+                _id: user._id,
+                username: user.username,
+                image: user.image,
+                name: user.name,
+                email: user.email,
+                bio: user.bio,
+                totalLikes: user.totalLikes,
+                followers: user.followers,
+                following: user.following,
+                totalPosts: user.totalPosts
+            }
+        });
+
+    } catch (err) {
+        console.error("getUserById error:", err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
+module.exports = { signup, login, logout, followUser, unfollowUser, getMe, getAllUsers, searchUsers, getUserById };

@@ -5,9 +5,9 @@ const cloudinary = require("../config/cloudinary");
 const storage = new CloudinaryStorage({
     cloudinary,
     params: {
-        folder: "profile_images",
-        allowed_formats: ["jpg", "jpeg", "png"],
-        resource_type: "image",
+        folder: "videos",
+        resource_type: "video",
+        allowed_formats: ["mp4", "mov", "avi", "webm", "mkv"],
     },
 });
 

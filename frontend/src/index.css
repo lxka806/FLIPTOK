@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+
+body {
+    background-color: #0B1220;
+    color: #F8FAFC;
+}
+
+/* Target the main viewport scrollbar track width */
+::-webkit-scrollbar {
+  width: 8px;  /* Make it ultra-thin and clean */
+  height: 8px; /* For horizontal track bars if any */
+}
+
+/* The structural background trail path */
+::-webkit-scrollbar-track {
+  background: #0F172A; /* Match your app background exactly (#0F172A) */
+}
+
+/* The actual draggable slider handle thumb element */
+::-webkit-scrollbar-thumb {
+  background: #334155; /* Sleek charcoal thumb color */
+  border-radius: 9999px; /* Make it smooth and completely rounded */
+  border: 2px solid #0F172A; /* Gives it an inner floating padding gap effect */
+}
+
+/* Highlight color accent changes when a user hovers directly over the bar */
+::-webkit-scrollbar-thumb:hover {
+  background: #475569; /* Lightens up slightly when hovered or active */
+}
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #334155 #0F172A;
+}
